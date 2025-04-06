@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-/* Estilos generales */
 body {
   font-family: 'Roboto', sans-serif;
   background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
@@ -9,7 +8,6 @@ body {
   color: #333;  
 }
 
-/* Header */
 header {
   background-color: #2c3e50;
   color: #fff;
@@ -74,7 +72,6 @@ section h2 {
   margin-bottom: 1rem;
 }
 
-/* Formularios */
 form div {
   margin-bottom: 1rem;
 }
@@ -115,7 +112,6 @@ button:hover {
   background-color: #2980b9;
 }
 
-/* Listas y tarjetas */
 .list-item {
   padding: 1rem;
   border-bottom: 1px solid #e0e0e0;
@@ -140,7 +136,6 @@ button:hover {
   margin-right: 0.5rem;
 }
 
-/* campo con posiciones */
 .soccer-field {
   position: relative;
   width: 600px;
@@ -172,8 +167,7 @@ button:hover {
   font-size: 0.85rem;
 }
 
-/* Posiciones en el campo (formación 4-4-2) */
-/* Delanteros */
+
 .soccer-field .position[data-position="ST1"] {
   left: 200px;
   top: 20px;
@@ -201,7 +195,6 @@ button:hover {
   top: 120px;
 }
 
-/* Defensas */
 .soccer-field .position[data-position="LB"] {
   left: 50px;
   top: 220px;
@@ -225,7 +218,6 @@ button:hover {
   top: 320px;
 }
 
-/* Footer */
 footer {
   text-align: center;
   background-color: #2c3e50;
@@ -236,7 +228,6 @@ footer {
   width: 100%;
 }
 
-/* Modal para advertencias */
 .modal {
   display: none;
   position: fixed;

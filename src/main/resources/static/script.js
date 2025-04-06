@@ -2,18 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const API_BASE_URL = 'http://localhost:8080/api';
     
 
-    // Diccionario de equipos conocidos y sus archivos de imagen (las claves deben ser en minúsculas)
-    const knownTeamsLogos = {
-        "atleticodemadrid": "atleticodemadrid.JPG",
-        "barcelona": "barcelona.JPG",
-        "betis": "betis.JPG",
-        "borusia": "borusia.JPG",
-        "liverpool": "liverpool.JPG",
-        "milan": "milan.JPG",
-        "monaco": "monaco.JPG",
-        "realmadrid": "realmadrid.JPG"
-    };
-
     /* ======================= Helper Functions ======================= */
     async function fetchData(endpoint) {
         const response = await fetch(`${API_BASE_URL}/${endpoint}`);
@@ -45,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Positions found:", positions.length);
             positions.forEach(posEl => {
                 const pos = posEl.getAttribute('data-position');
-                // Actualizamos el texto: si la plantilla tiene el valor, se muestra; si no, se muestra la posición
                 posEl.textContent = lineup[pos] || pos;
             });
         }).catch(error => {
@@ -157,10 +144,11 @@ document.addEventListener('DOMContentLoaded', function () {
             teamsArray.forEach(team => {
                 const div = document.createElement('div');
                 div.classList.add('list-item');
+                const isMainPage = window.location.pathname === '/';
                 div.innerHTML = `
                     <img src="${team.badge}" alt="${team.name}" class="team-logo" style="width:40px; height:40px; vertical-align: middle; margin-right: 8px;">
                     <strong>${team.name}</strong> - Coach: ${team.coach}
-                    <button data-id="${team.id}" class="show-lineup">Show Lineup</button>
+                    ${!isMainPage ? `<button data-id="${team.id}" class="show-lineup">Show Lineup</button>` : ''}
                     <button data-id="${team.id}" class="delete-team">Delete</button>
                 `;
                 teamsContainer.appendChild(div);
@@ -176,9 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.classList.contains('show-lineup')) {
                 console.log("Show Lineup button clicked, team id:", e.target.getAttribute('data-id'));
                 const id = e.target.getAttribute('data-id');
-                // En lugar de redirigir, mostramos directamente la alineación
                 loadTeamLineup(parseInt(id));
-                // Aseguramos que el apartado de la alineación esté visible
                 document.getElementById('players-field').style.display = 'block';
             }
             
@@ -205,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // First, find the teams by name
             const teams = await fetchData('teams');
             const teamsArray = Object.values(teams);
 
@@ -231,13 +216,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             
-            // Now create the match with team IDs
             const match = { 
                 date, 
                 time, 
                 team1Id: team1.id, 
                 team2Id: team2.id, 
-                tournamentId: tournament.id  // You'd need to fetch tournament ID similarly
+                tournamentId: tournament.id 
             };
             
             await postData('matches', match);
@@ -251,17 +235,13 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(`matches: ${JSON.stringify(matchesArray)}`);
             matchesContainer.innerHTML = '';
             for (const match of matchesArray) {
-                // Obtenemos los equipos usando sus IDs
                 const team1 = await fetchData(`teams/${match.team1Id}`);
                 const team2 = await fetchData(`teams/${match.team2Id}`);
-                // Obtenemos el torneo para mostrar el nombre (opcional)
                 const tournament = await fetchData(`tournaments/${match.tournamentId}`);
         
-                // Usamos el campo badge directamente, si no existe, usamos un default
                 const team1Logo = team1.badge ? team1.badge : `${API_BASE_URL}/logos/default.jpg`;
                 const team2Logo = team2.badge ? team2.badge : `${API_BASE_URL}/logos/default.jpg`;
         
-                // También obtenemos los nombres de los equipos
                 const team1Name = team1.name;
                 const team2Name = team2.name;
                 const tournamentName = tournament.name;
@@ -314,7 +294,6 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.style.display = "none";
       }
       
-      // Cerrar el modal al hacer clic en la 'X'
       document.getElementById('modal-close').addEventListener('click', hideModal);
 
 
