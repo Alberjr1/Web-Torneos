@@ -119,13 +119,42 @@ button:hover {
   background-color: #2980b9;
 }
 
-.list-item {
-  padding: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+/* ———  Tarjetas genéricas de listas (teams, matches, tournaments) ——— */
+.list-item{
+  position: relative;
   margin-bottom: 1rem;
-  border-radius: 4px;
-  background-color: #fafafa;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,.06);
+
+  
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(6px);
+
+  
+  box-shadow: 0 3px 8px rgba(0,0,0,.08);
+
+  
+  color:#222;                 
 }
+
+
+.list-item p,
+.list-item span{
+  color:#555;
+}
+
+
+.list-item strong{
+  color:#111;
+  font-weight:600;
+}
+
+
+.list-item + .list-item{      
+  margin-top: 1.25rem;
+}
+
 
 .match-card {
   display: flex;
@@ -300,12 +329,143 @@ section h2 {
 .close{
   color:#444;
 }
-.close:hover{ color:#111; }
+        
 
-#teams-list .list-item,                 
-#teams-list .list-item strong           
-{
-  color: #fff;                          
-  text-shadow: 0 1px 3px rgba(0,0,0,.65); 
+
+/* ----- Cambios en header y footer  ----------------- */
+header, footer{
+  background: rgba(0,0,0,.50);           
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,.40);
 }
+
+/* interior flex  */
+.header-inner{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: .75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;       
+}
+
+/* Título a la izquierda */
+header h1{
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* --------- Nav --------------- */
+.main-nav{
+  display: flex;
+  gap: 2rem;                             
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.main-nav a{
+  color: #eee;
+  font-weight: 500;
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 4px;
+  transition: color .25s;
+}
+
+/* sub-rayado animado al pasar el ratón */
+.main-nav a::after{
+  content:'';
+  position:absolute;
+  left:0; bottom:0;
+  width:0; height:2px;
+  background:#46b0ff;
+  transition:width .25s;
+}
+.main-nav a:hover{
+  color:#46b0ff;
+}
+.main-nav a:hover::after{
+  width:100%;
+}
+
+body{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;         
+}
+
+main{
+  flex:1;
+}
+
+footer{
+  position:relative;         
+  background: rgba(0,0,0,.50);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,.15);
+  text-align:center;
+  font-size:.9rem;
+  padding:.75rem 1rem;
+  color:#ddd;
+  width:100%;
+  box-shadow:0 -2px 8px rgba(0,0,0,.4);
+}
+
+/* ----- Cambios para los botones ----- */
+
+:root{
+  --btn-main:   #11c5ba;          
+  --btn-main-h: #0ea99f;          
+  
+  --btn-danger:   #ff5e5e;        
+  --btn-danger-h: #e64c4c;
+}
+
+/* ----- Botón base ----- */
+button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+
+  font:600 1rem/1 'Roboto',sans-serif;
+  padding:.65rem 1.4rem;
+  
+  background:var(--btn-main);
+  color:#fff;
+  border:none;
+  border-radius:30px;
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+  
+  cursor:pointer;
+  transition:background .18s,transform .18s,box-shadow .18s;
+}
+
+button:hover{
+  background:var(--btn-main-h);
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+
+button:active{
+  transform:translateY(0);
+  box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
+
+
+button.delete-team,
+button.delete-match,
+button.delete-tournament{
+  background:var(--btn-danger);
+}
+
+button.delete-team:hover,
+button.delete-match:hover,
+button.delete-tournament:hover{
+  background:var(--btn-danger-h);
+}
+
 
