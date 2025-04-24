@@ -9,6 +9,8 @@ import practica1.artefacto.repository.MatchRepository;
 import practica1.artefacto.repository.TeamRepository;
 import practica1.artefacto.repository.TournamentRepository;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,17 @@ public class MatchService {
     private TournamentRepository tournamentRepository;
 
     public Match create(Match match) {
+        // Validate date - prevent matches with dates in the past
+        if (match.getDate() != null && !match.getDate().isEmpty()) {
+            LocalDate matchDate = LocalDate.parse(match.getDate(), DateTimeFormatter.ISO_DATE);
+            LocalDate today = LocalDate.now();
+            
+            if (matchDate.isBefore(today)) {
+                throw new IllegalArgumentException("Cannot create a match with a date in the past. Match date: " 
+                        + match.getDate() + ", Current date: " + today.format(DateTimeFormatter.ISO_DATE));
+            }
+        }
+        
         // Validate that both teams exist
         Team team1 = teamRepository.findById(match.getTeam1Id())
             .orElseThrow(() -> new IllegalArgumentException("Team 1 with ID " + match.getTeam1Id() + " not found"));

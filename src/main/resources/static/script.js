@@ -191,6 +191,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Check if the date is in the past
+            const matchDate = new Date(date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time part for date comparison
+            
+            if (matchDate < today) {
+                showModal("Cannot create a match with a date in the past.");
+                return;
+            }
+
             const teams = await fetchData('teams');
             const teamsArray = Object.values(teams);
 
