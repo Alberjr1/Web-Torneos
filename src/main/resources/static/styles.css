@@ -468,4 +468,11 @@ button.delete-tournament:hover{
   background:var(--btn-danger-h);
 }
 
+/* Para separar los formularios del boton de add */
+form{
+  margin-bottom: 1.25rem;       
+}
+
+
+
 

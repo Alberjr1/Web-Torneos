@@ -296,6 +296,8 @@ document.addEventListener('DOMContentLoaded', function () {
       
       document.getElementById('modal-close').addEventListener('click', hideModal);
 
+      
+
 
 });
 
