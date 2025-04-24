@@ -1,12 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+/* --- Fondo a pantalla completa con degradado + imagen --- */
 body {
+  /* Imagen de fondo (pon la ruta real de tu asset) */
+  background: 
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),   /* oscurece la foto para que el texto siga legible */
+    url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSra3BSFoHy4g9tTwa31P1nzgKApjsJRdSMHw&s") no-repeat center center fixed;
+  background-size: cover;          /* que rellene toda la pantalla */
   font-family: 'Roboto', sans-serif;
-  background: linear-gradient(to bottom right, #f0f4f8, #d9e2ec);
+  color: #eee;                     /* texto claro sobre fondo oscuro */
   margin: 0;
-  padding: 0;
-  color: #333;  
+  min-height: 100vh;
 }
+
 
 header {
   background-color: #2c3e50;
@@ -51,10 +57,11 @@ nav a:hover {
 
 
 main {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 2rem 5vw;      /* 5 % de margen a los lados, responsive */
+  width: 100%;
+  box-sizing: border-box;
 }
+
 
 section {
   background-color: #fff;
@@ -268,3 +275,37 @@ footer {
   display: flex;
   flex-direction: column;
 }
+
+/* --- Para que el texto se vea con la imagen de fondo --- */
+
+header h1,
+section h2 {
+  color: #fff;                               
+  text-shadow: 0 2px 4px rgba(0,0,0,.6);      
+}
+
+
+.soccer-field .position{
+  color:#111;                                
+  font-weight:600;
+}
+
+
+.modal-content{
+  color:#222;                                
+  text-shadow:none;
+}
+
+
+.close{
+  color:#444;
+}
+.close:hover{ color:#111; }
+
+#teams-list .list-item,                 
+#teams-list .list-item strong           
+{
+  color: #fff;                          
+  text-shadow: 0 1px 3px rgba(0,0,0,.65); 
+}
+
