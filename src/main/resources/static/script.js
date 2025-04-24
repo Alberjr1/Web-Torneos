@@ -40,17 +40,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
-    document.addEventListener('DOMContentLoaded', function () {
-        const teamsView = document.getElementById('teams-view');
-        if (teamsView) {
-            const params = new URLSearchParams(window.location.search);
-            const teamId = params.get('teamId');
-            if (teamId) {
-                console.log("Reading teamId from URL:", teamId);
-                loadTeamLineup(parseInt(teamId));
-            }
+    const teamsView = document.getElementById('teams-view');
+    if (teamsView) {
+        const params = new URLSearchParams(window.location.search);
+        const teamId = params.get('teamId');
+        if (teamId) {
+            console.log("Reading teamId from URL:", teamId);
+            loadTeamLineup(parseInt(teamId));
         }
-    });
+    }
 
     async function postData(endpoint, data) {
         const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
@@ -144,11 +142,10 @@ document.addEventListener('DOMContentLoaded', function () {
             teamsArray.forEach(team => {
                 const div = document.createElement('div');
                 div.classList.add('list-item');
-                const isMainPage = window.location.pathname === '/';
                 div.innerHTML = `
                     <img src="${team.badge}" alt="${team.name}" class="team-logo" style="width:40px; height:40px; vertical-align: middle; margin-right: 8px;">
                     <strong>${team.name}</strong> - Coach: ${team.coach}
-                    ${!isMainPage ? `<button data-id="${team.id}" class="show-lineup">Show Lineup</button>` : ''}
+                    <button data-id="${team.id}" class="show-lineup">Show Lineup</button>
                     <button data-id="${team.id}" class="delete-team">Delete</button>
                 `;
                 teamsContainer.appendChild(div);
