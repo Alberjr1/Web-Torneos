@@ -1,5 +1,9 @@
 package practica1.artefacto.model;
+
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 public class Team {
     @Id
@@ -8,7 +12,10 @@ public class Team {
     private String name;
     private String coach;
     private String badge;
-
+    
+    // Add the many-to-many relationship
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TournamentTeam> teamTournaments = new HashSet<>();
 
     // Getters and Setters
     public Long getId() {
@@ -25,7 +32,7 @@ public class Team {
     }
     public String getCoach() {
         return coach;
-    }
+        }
     public void setCoach(String coach) {
         this.coach = coach;
     }
@@ -34,5 +41,14 @@ public class Team {
     }
     public void setBadge(String badge) {
         this.badge = badge;
+    }
+
+    // New getter and setter for teamTournaments
+    public Set<TournamentTeam> getTeamTournaments() {
+        return teamTournaments;
+    }
+    
+    public void setTeamTournaments(Set<TournamentTeam> teamTournaments) {
+        this.teamTournaments = teamTournaments;
     }
 }

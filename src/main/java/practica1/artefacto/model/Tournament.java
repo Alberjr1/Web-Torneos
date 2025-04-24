@@ -2,7 +2,9 @@ package practica1.artefacto.model;
 
 import jakarta.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Tournament {
@@ -13,12 +15,28 @@ public class Tournament {
     private String date;
     private String location;
 
+    // Keep the existing teamIds for backward compatibility if needed
     @ElementCollection
     private List<Long> teamIds = new ArrayList<>();
 
     @ElementCollection
     private List<Long> matchIds = new ArrayList<>();
-
+    
+    // Add the many-to-many relationship
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TournamentTeam> tournamentTeams = new HashSet<>();
+    
+    // Convenience method to add a team to the tournament
+    public void addTeam(Team team) {
+        TournamentTeam tournamentTeam = new TournamentTeam(this, team);
+        tournamentTeams.add(tournamentTeam);
+    }
+    
+    // Convenience method to remove a team from the tournament
+    public void removeTeam(Team team) {
+        tournamentTeams.removeIf(tournamentTeam -> tournamentTeam.getTeam().equals(team));
+    }
+    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -80,5 +98,14 @@ public class Tournament {
     }
     public void addTeams(List<Long> teamIds) {
         this.teamIds.addAll(teamIds);
+    }
+    
+    // New getter and setter for tournamentTeams
+    public Set<TournamentTeam> getTournamentTeams() {
+        return tournamentTeams;
+    }
+    
+    public void setTournamentTeams(Set<TournamentTeam> tournamentTeams) {
+        this.tournamentTeams = tournamentTeams;
     }
 }
