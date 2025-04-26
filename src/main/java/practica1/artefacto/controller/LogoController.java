@@ -23,7 +23,7 @@ public class LogoController {
         }
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") // Adjust content type based on your image format
+                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") // Adjust content type based on image format
                 .body(resource);
     }
 }

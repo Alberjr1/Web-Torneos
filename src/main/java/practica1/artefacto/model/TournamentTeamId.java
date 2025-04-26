@@ -36,7 +36,7 @@ public class TournamentTeamId implements Serializable {
         this.teamId = teamId;
     }
     
-    // Equals and hashCode methods are required for composite keys
+    // Equals and hashCode methods for composite keys
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

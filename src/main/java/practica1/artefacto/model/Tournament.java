@@ -112,7 +112,7 @@ public class Tournament {
         this.tournamentTeams = tournamentTeams;
     }
 
-    // Add getter and setter for matches
+    // getter and setter for matches
     public List<Match> getMatches() {
         return matches;
     }
