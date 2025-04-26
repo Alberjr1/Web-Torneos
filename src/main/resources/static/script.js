@@ -136,36 +136,50 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         async function updateTeamsList() {
-            const teams = await fetchData('teams');
-            const teamsArray = Object.values(teams);
+            const teams        = await fetchData('teams');
+            const teamsArray   = Object.values(teams);
             teamsContainer.innerHTML = '';
+          
             teamsArray.forEach(team => {
-                const div = document.createElement('div');
-                div.classList.add('list-item');
-                div.innerHTML = `
-                    <img src="${team.badge}" alt="${team.name}" class="team-logo" style="width:40px; height:40px; vertical-align: middle; margin-right: 8px;">
-                    <strong>${team.name}</strong> - Coach: ${team.coach}
-                    <button data-id="${team.id}" class="show-lineup">Show Lineup</button>
-                    <button data-id="${team.id}" class="delete-team">Delete</button>
-                `;
-                teamsContainer.appendChild(div);
+              const div = document.createElement('div');
+              div.classList.add('list-item');
+          
+              div.innerHTML = `
+                <img src="${team.badge}" alt="${team.name}" class="team-logo">
+                <strong>${team.name}</strong> – Coach: ${team.coach}
+                <button data-id="${team.id}" class="show-lineup">Show Line-up</button>
+                <button data-id="${team.id}" class="delete-team">Delete</button>
+              `;
+          
+              teamsContainer.appendChild(div);
             });
-        }
+          }
+          
 
-        teamsContainer.addEventListener('click', async function (e) {
+          teamsContainer.addEventListener('click', async function (e) {
+
             if (e.target.classList.contains('delete-team')) {
-                const id = e.target.getAttribute('data-id');
-                await deleteData('teams', id);
-                updateTeamsList();
+              const id = e.target.dataset.id;
+              await deleteData('teams', id);
+              updateTeamsList();
+              return;
             }
+          
             if (e.target.classList.contains('show-lineup')) {
-                console.log("Show Lineup button clicked, team id:", e.target.getAttribute('data-id'));
-                const id = e.target.getAttribute('data-id');
+              const id          = e.target.dataset.id;
+              const inTeamsPage = window.location.pathname.endsWith('teams.html');
+          
+              if (inTeamsPage) {
+                // Si estamos en la misma pagina se muestra la alineacion
                 loadTeamLineup(parseInt(id));
                 document.getElementById('players-field').style.display = 'block';
+              } else {
+                // si estamos en otra pagina redirige a la pagina de equipos
+                window.location.href = `teams.html?teamId=${id}`;
+              }
             }
-            
-        });
+          });
+          
 
         updateTeamsList();
     }
