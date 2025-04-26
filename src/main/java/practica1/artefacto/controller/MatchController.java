@@ -8,6 +8,7 @@ import practica1.artefacto.model.Match;
 import practica1.artefacto.service.MatchService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/matches")
@@ -26,9 +27,9 @@ public class MatchController {
         }
     }
 
-    @GetMapping("/{id}")
-    public Match read(@PathVariable Long id) {
-        return matchService.getMatchWithTeams(id);
+    @PatchMapping("/{id}")
+    public Match patch(@PathVariable Long id,@RequestBody Map<String,Object> updates){
+        return matchService.patch(id,updates);
     }
 
     @GetMapping

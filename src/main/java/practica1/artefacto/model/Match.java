@@ -21,6 +21,12 @@ public class Match {
     @Column(name = "tournament_id")
     private Long tournamentId;
     
+    // Add JPA relationship with Tournament
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Tournament tournament;
+    
     // Add transient fields for full team objects
     @Transient
     @JsonIgnore
@@ -88,6 +94,18 @@ public class Match {
         this.team2 = team2;
         if (team2 != null) {
             this.team2Id = team2.getId();
+        }
+    }
+
+    // Add getter and setter for tournament
+    public Tournament getTournament() {
+        return tournament;
+    }
+    
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
+        if (tournament != null) {
+            this.tournamentId = tournament.getId();
         }
     }
 }

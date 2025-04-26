@@ -26,6 +26,9 @@ public class Tournament {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentTeam> tournamentTeams = new HashSet<>();
     
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL)
+    private List<Match> matches = new ArrayList<>();
+
     // Convenience method to add a team to the tournament
     public void addTeam(Team team) {
         TournamentTeam tournamentTeam = new TournamentTeam(this, team);
@@ -107,5 +110,14 @@ public class Tournament {
     
     public void setTournamentTeams(Set<TournamentTeam> tournamentTeams) {
         this.tournamentTeams = tournamentTeams;
+    }
+
+    // Add getter and setter for matches
+    public List<Match> getMatches() {
+        return matches;
+    }
+
+    public void setMatches(List<Match> matches) {
+        this.matches = matches;
     }
 }
