@@ -6,6 +6,7 @@ import practica1.artefacto.model.Team;
 import practica1.artefacto.service.TeamService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -38,5 +39,11 @@ public class TeamController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         teamService.delete(id);
+    }
+
+    @PatchMapping("/{id}")
+    public Team patch(@PathVariable Long id,
+                      @RequestBody Map<String, Object> updates) {
+        return teamService.patch(id, updates);
     }
 }

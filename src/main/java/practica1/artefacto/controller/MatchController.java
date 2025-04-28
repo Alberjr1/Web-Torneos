@@ -46,4 +46,7 @@ public class MatchController {
     public void delete(@PathVariable Long id) {
         matchService.delete(id);
     }
+
+
+
 }

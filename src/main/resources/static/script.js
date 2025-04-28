@@ -72,6 +72,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.json();
     }
 
+    async function patchEntity(resource, id, payload) {
+        return fetch(`${API_BASE_URL}/${resource}/${id}`, {
+          method : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify(payload)
+        }).then(r => r.json());
+      }
+
     /* ======================= Tournaments Functionality ======================= */
     if (document.getElementById('tournament-form')) {
         const tournamentForm = document.getElementById('tournament-form');
@@ -98,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 div.classList.add('list-item');
                 div.innerHTML = `
                     <strong>${tournament.name}</strong> - ${tournament.date} - ${tournament.location}
+                     <button data-id="${tournament.id}" class="edit-tournament">Edit</button>
                     <button data-id="${tournament.id}" class="delete-tournament">Delete</button>
                     <div class="details">
                         <p>Teams: ${tournament.teamIds.length}</p>
@@ -114,6 +123,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 await deleteData('tournaments', id);
                 updateTournamentsList();
             }
+            // --- EDIT TOURNAMENT ---
+        if (e.target.classList.contains('edit-tournament')) {
+            const id = e.target.dataset.id;
+            const t  = await fetchData(`tournaments/${id}`);
+        
+            const newName = prompt('New name:',      t.name);
+            const newDate = prompt('New date (YYYY-MM-DD):', t.date);
+            const newLoc  = prompt('New location:',  t.location);
+        
+            const patch = {};
+            if (newName && newName !== t.name)        patch.name     = newName;
+            if (newDate && newDate !== t.date)        patch.date     = newDate;
+            if (newLoc  && newLoc  !== t.location)    patch.location = newLoc;
+        
+            if (Object.keys(patch).length) {
+            await patchEntity('tournaments', id, patch);
+            updateTournamentsList();
+            }
+            return;
+        }
+  
         });
 
         updateTournamentsList();
@@ -148,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <img src="${team.badge}" alt="${team.name}" class="team-logo">
                 <strong>${team.name}</strong> – Coach: ${team.coach}
                 <button data-id="${team.id}" class="show-lineup">Show Line-up</button>
+                <button data-id="${team.id}" class="edit-team">Edit</button>
                 <button data-id="${team.id}" class="delete-team">Delete</button>
               `;
           
@@ -178,8 +209,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = `teams.html?teamId=${id}`;
               }
             }
+            // --- EDIT TEAM ---
+            if (e.target.classList.contains('edit-team')) {
+                const id   = e.target.dataset.id;
+                const team = await fetchData(`teams/${id}`);
+            
+                const newName  = prompt('New team name:', team.name);
+                const newCoach = prompt('New coach:',     team.coach);
+            
+                const patch = {};
+                if (newName  && newName  !== team.name)  patch.name  = newName;
+                if (newCoach && newCoach !== team.coach) patch.coach = newCoach;
+            
+                if (Object.keys(patch).length) {
+                await patchEntity('teams', id, patch);
+                updateTeamsList();
+                }
+                return;
+            }
           });
-          
 
         updateTeamsList();
     }
@@ -284,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <p><strong>Tournament:</strong> ${tournamentName}</p>
                             <p><strong>Date:</strong> ${match.date} - <strong>Time:</strong> ${match.time}</p>
                         </div>
+                        <button data-id="${match.id}" class="edit-match">Edit</button>
                         <button data-id="${match.id}" class="delete-match">Delete</button>
                     </div>
                 `;
@@ -298,6 +347,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 await deleteData('matches', id);
                 updateMatchesList();
             }
+
+            // --- EDIT MATCH ---
+            if (e.target.classList.contains('edit-match')) {
+                const id = e.target.dataset.id;
+                const m  = await fetchData(`matches/${id}`);
+            
+                const newDate = prompt('New date (YYYY-MM-DD):', m.date);
+                const newTime = prompt('New time (HH:MM):',      m.time);
+            
+                const patch = {};
+                if (newDate && newDate !== m.date) patch.date = newDate;
+                if (newTime && newTime !== m.time) patch.time = newTime;
+            
+                if (Object.keys(patch).length) {
+                await patchEntity('matches', id, patch);
+                updateMatchesList();
+                }
+                return;
+            }
+  
         });
 
         updateMatchesList();

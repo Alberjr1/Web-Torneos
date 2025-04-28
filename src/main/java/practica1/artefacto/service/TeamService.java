@@ -6,6 +6,7 @@ import practica1.artefacto.model.Team;
 import practica1.artefacto.repository.TeamRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TeamService {
@@ -33,5 +34,19 @@ public class TeamService {
 
     public List<Team> getAll() {
         return teamRepository.findAll();
+    }
+
+    public Team patch(Long id, Map<String, Object> updates) {
+        return teamRepository.findById(id).map(team -> {
+
+            updates.forEach((k, v) -> {
+                switch (k) {
+                    case "name"   -> team.setName((String) v);
+                    case "coach"  -> team.setCoach((String) v);
+                    case "badge"  -> team.setBadge((String) v);
+                }
+            });
+            return teamRepository.save(team);
+        }).orElse(null);
     }
 }
