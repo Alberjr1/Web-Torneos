@@ -139,6 +139,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const date = document.getElementById('tournament-date').value;
             const location = document.getElementById('tournament-location').value;
 
+            const tournamentDate = new Date(date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time part for date comparison
+            
+            if (tournamentDate < today) {
+                showModal("Cannot create a tournament with a date in the past.");
+                return;
+            }
+
             const tournament = { name, date, location, teams: [], matches: [] };
             await postData('tournaments', tournament);
             updateTournamentsList();
