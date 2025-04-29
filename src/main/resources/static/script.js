@@ -117,6 +117,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const v = formData.get(f);
         if(v!=='' && v!==String(data[f]??'')) patch[f]=v;
         });
+
+        if (patch.date) {
+            const today = new Date();            
+            today.setHours(0, 0, 0, 0);          
+            const selected = new Date(patch.date);
+        
+            if (selected < today) {
+              showModal('Date cannot be in the past.');
+              return;                            // cancela el PATCH
+            }
+          }
+
         if(Object.keys(patch).length){
         await patchEntity(entity, id, patch);
         cbRefresh();
