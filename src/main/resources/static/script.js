@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
                      id,                     
                      t,                     
                      ['name','date','location'], 
-                     updateTournamentsList   
+                     updateTournamentsList   // callback de refresco
                    );
                    return;
                  }
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const m  = await fetchData(`matches/${id}`);
             
                 openEditModal(
-                  'matches',              
+                  'matchess',              
                   id,                     
                   m,                      
                   ['date','time'],        
