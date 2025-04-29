@@ -80,6 +80,54 @@ document.addEventListener('DOMContentLoaded', function () {
         }).then(r => r.json());
       }
 
+      /* ---------- EDIT MODAL helpers ---------- */
+    const editModal  = document.getElementById('edit-modal');
+    const editTitle  = document.getElementById('edit-title');
+    const editFields = document.getElementById('edit-fields');
+    const editForm   = document.getElementById('edit-form');
+    document.getElementById('edit-close').onclick = () => editModal.style.display='none';
+
+    /**
+     * Abre el modal con los campos indicados.
+     * @param {String}  entity      'teams' | 'tournaments' | 'matches'
+     * @param {Number}  id          id del registro
+     * @param {Object}  data        objeto con los valores actuales
+     * @param {Array}   fields      ['name','coach']  (propiedades editables)
+     * @param {Function} cbRefresh  función para recargar la lista tras guardar
+     */
+    function openEditModal(entity, id, data, fields, cbRefresh){
+    // título
+    editTitle.textContent = `Edit ${entity.slice(0,-1)} #${id}`;
+
+    // genera los <label><input>
+    editFields.innerHTML = '';
+    fields.forEach(f=>{
+        editFields.insertAdjacentHTML('beforeend',`
+        <label style="display:block;margin:.5rem 0 .2rem">${f.charAt(0).toUpperCase()+f.slice(1)}</label>
+        <input name="${f}" value="${data[f] ?? ''}" style="width:100%;padding:.4rem">
+        `);
+    });
+
+    // submit
+    editForm.onsubmit = async ev => {
+        ev.preventDefault();
+        const formData = new FormData(editForm);
+        const patch = {};
+        fields.forEach(f=>{
+        const v = formData.get(f);
+        if(v!=='' && v!==String(data[f]??'')) patch[f]=v;
+        });
+        if(Object.keys(patch).length){
+        await patchEntity(entity, id, patch);
+        cbRefresh();
+        }
+        editModal.style.display='none';
+    };
+
+    // muestra
+    editModal.style.display='block';
+    }
+
     /* ======================= Tournaments Functionality ======================= */
     if (document.getElementById('tournament-form')) {
         const tournamentForm = document.getElementById('tournament-form');
@@ -124,25 +172,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 updateTournamentsList();
             }
             // --- EDIT TOURNAMENT ---
-        if (e.target.classList.contains('edit-tournament')) {
-            const id = e.target.dataset.id;
-            const t  = await fetchData(`tournaments/${id}`);
-        
-            const newName = prompt('New name:',      t.name);
-            const newDate = prompt('New date (YYYY-MM-DD):', t.date);
-            const newLoc  = prompt('New location:',  t.location);
-        
-            const patch = {};
-            if (newName && newName !== t.name)        patch.name     = newName;
-            if (newDate && newDate !== t.date)        patch.date     = newDate;
-            if (newLoc  && newLoc  !== t.location)    patch.location = newLoc;
-        
-            if (Object.keys(patch).length) {
-            await patchEntity('tournaments', id, patch);
-            updateTournamentsList();
-            }
-            return;
-        }
+            if (e.target.classList.contains('edit-tournament')) {
+                   const id = e.target.dataset.id;
+                   const t  = await fetchData(`tournaments/${id}`);
+                
+                   openEditModal(
+                     'tournaments',          
+                     id,                     
+                     t,                     
+                     ['name','date','location'], 
+                     updateTournamentsList   
+                   );
+                   return;
+                 }
   
         });
 
@@ -211,22 +253,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             // --- EDIT TEAM ---
             if (e.target.classList.contains('edit-team')) {
-                const id   = e.target.dataset.id;
-                const team = await fetchData(`teams/${id}`);
+                const id = e.target.dataset.id;
+                const t  = await fetchData(`teams/${id}`);
             
-                const newName  = prompt('New team name:', team.name);
-                const newCoach = prompt('New coach:',     team.coach);
-            
-                const patch = {};
-                if (newName  && newName  !== team.name)  patch.name  = newName;
-                if (newCoach && newCoach !== team.coach) patch.coach = newCoach;
-            
-                if (Object.keys(patch).length) {
-                await patchEntity('teams', id, patch);
-                updateTeamsList();
-                }
+                openEditModal(
+                  'teams',              
+                  id,                    
+                  t,                     
+                  ['name','coach'],      
+                  updateTeamsList        
+                );
                 return;
-            }
+              }
           });
 
         updateTeamsList();
@@ -353,19 +391,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const id = e.target.dataset.id;
                 const m  = await fetchData(`matches/${id}`);
             
-                const newDate = prompt('New date (YYYY-MM-DD):', m.date);
-                const newTime = prompt('New time (HH:MM):',      m.time);
-            
-                const patch = {};
-                if (newDate && newDate !== m.date) patch.date = newDate;
-                if (newTime && newTime !== m.time) patch.time = newTime;
-            
-                if (Object.keys(patch).length) {
-                await patchEntity('matches', id, patch);
-                updateMatchesList();
-                }
+                openEditModal(
+                  'matches',              
+                  id,                     
+                  m,                      
+                  ['date','time'],        
+                  updateMatchesList       
+                );
                 return;
-            }
+              }
   
         });
 
