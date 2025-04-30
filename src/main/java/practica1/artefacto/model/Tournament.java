@@ -15,14 +15,14 @@ public class Tournament {
     private String date;
     private String location;
 
-    // Keep the existing teamIds for backward compatibility if needed
+    
     @ElementCollection
     private List<Long> teamIds = new ArrayList<>();
 
     @ElementCollection
     private List<Long> matchIds = new ArrayList<>();
     
-    // Add the many-to-many relationship
+    
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentTeam> tournamentTeams = new HashSet<>();
     

@@ -11,7 +11,7 @@ public class CustomErrorPageConfig implements ErrorPageRegistrar {
 
     @Override
     public void registerErrorPages(ErrorPageRegistry registry) {
-        // Redirige cualquier 404 a /error/404.html (ruta dentro de static/)
+        // Redirige cualquier 404 a /error/404.html
         registry.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/404.html"));
     }
 }
