@@ -2,7 +2,6 @@ package practica1.artefacto.config;
 
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,28 +43,26 @@ public class SecurityConfig {
           .authenticationProvider(authProvider())
           .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.GET,
-                "/", "/index.html",
-                "/tournaments.html", "/teams.html", "/matches.html",
-                "/login", "/styles.css", "/js/**", "/api/logos/**"
+                "/login.html", "/styles.css", "/js/**", "/api/logos/**", 
+                "/favicon.ico", "/404.html"
             ).permitAll()
             // Sólo ADMIN puede modificar la API
             .requestMatchers(HttpMethod.POST,   "/api/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT,    "/api/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PATCH,  "/api/**").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-            // resto (login, logout) lo dejamos abierto
-            .anyRequest().permitAll()
+            .anyRequest().authenticated()
           )
           .formLogin(form -> form
-            .loginPage("/login")
+            .loginPage("/login.html")
             .loginProcessingUrl("/login")
-            .defaultSuccessUrl("/", true)
-            .failureUrl("/login?error")
+            .defaultSuccessUrl("/index.html", true)
+            .failureUrl("/login.html?error")
             .permitAll()
           )
           .logout(logout -> logout
             .logoutUrl("/logout")
-            .logoutSuccessUrl("/login?logout")
+            .logoutSuccessUrl("/login.html?logout")
             .permitAll()
           )
           .csrf(csrf -> csrf.disable())
