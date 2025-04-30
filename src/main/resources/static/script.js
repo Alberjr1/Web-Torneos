@@ -1,450 +1,363 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const API_BASE_URL = 'http://localhost:8080/api';
-    
+    let isAdmin = false;
 
-    /* ======================= Helper Functions ======================= */
+    /* ======================= User / Roles ======================= */
     async function fetchData(endpoint) {
-        const response = await fetch(`${API_BASE_URL}/${endpoint}`);
-        return response.json();
-    }
-    function loadTeamLineup(teamId) {
-        const soccerField = document.querySelector('.soccer-field');
-        if (!soccerField) {
-            console.warn("No soccer-field container found in the teams section.");
-            return;
-        }
-        fetchData(`teams/${teamId}`).then(team => {
-            console.log("Team fetched:", team);
-            if (!team) return;
-            let lineup = team.players;
-            if (!lineup || Object.keys(lineup).length === 0) {
-                const key = team.name.trim().toLowerCase();
-                if (defaultTeamLineups[key]) {
-                    lineup = defaultTeamLineups[key];
-                    console.log("Using default lineup for", key, lineup);
-                } else {
-                    lineup = defaultLineup;
-                    console.log("No default lineup for", key, "using empty lineup", lineup);
-                }
-            } else {
-                console.log("Using team.players:", lineup);
-            }
-            const positions = soccerField.querySelectorAll('.position');
-            console.log("Positions found:", positions.length);
-            positions.forEach(posEl => {
-                const pos = posEl.getAttribute('data-position');
-                posEl.textContent = lineup[pos] || pos;
-            });
-        }).catch(error => {
-            console.error("Error loading team lineup:", error);
-        });
-    }
-    
-    const teamsView = document.getElementById('teams-view');
-    if (teamsView) {
-        const params = new URLSearchParams(window.location.search);
-        const teamId = params.get('teamId');
-        if (teamId) {
-            console.log("Reading teamId from URL:", teamId);
-            loadTeamLineup(parseInt(teamId));
-        }
+        const res = await fetch(`${API_BASE_URL}/${endpoint}`);
+        return res.json();
     }
 
+    // carga info de /api/users/me para saber roles
+    async function loadUserInfo() {
+        try {
+            const me = await fetchData('users/me');
+            isAdmin = Array.isArray(me.roles) && me.roles.includes('ROLE_ADMIN');
+        } catch (e) {
+            console.warn('No pude cargar información de usuario', e);
+        }
+    }
+    await loadUserInfo();
+
+    /* ======================= Helpers ======================= */
     async function postData(endpoint, data) {
-        const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+        const res = await fetch(`${API_BASE_URL}/${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         });
-        return response.json();
+        return res.json();
     }
 
     async function deleteData(endpoint, id) {
         await fetch(`${API_BASE_URL}/${endpoint}/${id}`, { method: 'DELETE' });
     }
 
-    async function patchData(endpoint, id, updates) {
-        const response = await fetch(`${API_BASE_URL}/${endpoint}/${id}`, {
+    async function patchEntity(resource, id, payload) {
+        const res = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates),
+            body: JSON.stringify(payload),
         });
-        return response.json();
+        return res.json();
     }
 
-    async function patchEntity(resource, id, payload) {
-        return fetch(`${API_BASE_URL}/${resource}/${id}`, {
-          method : 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body   : JSON.stringify(payload)
-        }).then(r => r.json());
-      }
+    function showModal(message) {
+        const modal = document.getElementById('modal-alert');
+        const msgEl = document.getElementById('modal-message');
+        msgEl.textContent = message;
+        modal.style.display = 'block';
+    }
+    function hideModal() {
+        document.getElementById('modal-alert').style.display = 'none';
+    }
+    document.getElementById('modal-close').addEventListener('click', hideModal);
 
-      /* ---------- EDIT MODAL helpers ---------- */
+    /* ---------- EDIT-MODAL helpers ---------- */
     const editModal  = document.getElementById('edit-modal');
     const editTitle  = document.getElementById('edit-title');
     const editFields = document.getElementById('edit-fields');
     const editForm   = document.getElementById('edit-form');
-    document.getElementById('edit-close').onclick = () => editModal.style.display='none';
+    document.getElementById('edit-close').onclick = () => editModal.style.display = 'none';
 
-    /**
-     * Abre el modal con los campos indicados.
-     * @param {String}  entity      'teams' | 'tournaments' | 'matches'
-     * @param {Number}  id          id del registro
-     * @param {Object}  data        objeto con los valores actuales
-     * @param {Array}   fields      ['name','coach']  (propiedades editables)
-     * @param {Function} cbRefresh  función para recargar la lista tras guardar
-     */
-    function openEditModal(entity, id, data, fields, cbRefresh){
-    // título
-    editTitle.textContent = `Edit ${entity.slice(0,-1)} #${id}`;
-
-    // genera los <label><input>
-    editFields.innerHTML = '';
-    fields.forEach(f=>{
-        editFields.insertAdjacentHTML('beforeend',`
-        <label style="display:block;margin:.5rem 0 .2rem">${f.charAt(0).toUpperCase()+f.slice(1)}</label>
-        <input name="${f}" value="${data[f] ?? ''}" style="width:100%;padding:.4rem">
-        `);
-    });
-
-    // submit
-    editForm.onsubmit = async ev => {
-        ev.preventDefault();
-        const formData = new FormData(editForm);
-        const patch = {};
-        fields.forEach(f=>{
-        const v = formData.get(f);
-        if(v!=='' && v!==String(data[f]??'')) patch[f]=v;
+    function openEditModal(entity, id, data, fields, cbRefresh) {
+        editTitle.textContent = `Edit ${entity.slice(0,-1)} #${id}`;
+        editFields.innerHTML = '';
+        fields.forEach(f => {
+            editFields.insertAdjacentHTML('beforeend', `
+                <label style="display:block;margin:.5rem 0 .2rem">
+                  ${f.charAt(0).toUpperCase()+f.slice(1)}
+                </label>
+                <input name="${f}" value="${data[f] ?? ''}" style="width:100%;padding:.4rem">
+            `);
         });
-
-        if (patch.date) {
-            const today = new Date();            
-            today.setHours(0, 0, 0, 0);          
-            const selected = new Date(patch.date);
-        
-            if (selected < today) {
-              showModal('Date cannot be in the past.');
-              return;                            // cancela el PATCH
+        editForm.onsubmit = async ev => {
+            ev.preventDefault();
+            const formData = new FormData(editForm);
+            const patch = {};
+            fields.forEach(f => {
+                const v = formData.get(f);
+                if (v !== '' && v !== String(data[f] ?? '')) patch[f] = v;
+            });
+            // validación de fecha en pasado
+            if (patch.date) {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const sel   = new Date(patch.date);
+                if (sel < today) {
+                    showModal('Date cannot be in the past.');
+                    return;
+                }
             }
-          }
-
-        if(Object.keys(patch).length){
-        await patchEntity(entity, id, patch);
-        cbRefresh();
-        }
-        editModal.style.display='none';
-    };
-
-    // muestra
-    editModal.style.display='block';
+            await patchEntity(entity, id, patch);
+            cbRefresh();
+            editModal.style.display = 'none';
+        };
+        editModal.style.display = 'block';
     }
 
-    /* ======================= Tournaments Functionality ======================= */
+    /* ======================= Load Line-up ======================= */
+    function loadTeamLineup(teamId) {
+        const soccerField = document.querySelector('.soccer-field');
+        if (!soccerField) return;
+        fetchData(`teams/${teamId}`)
+          .then(team => {
+            if (!team) return;
+            let lineup = team.players || {};
+            const key = team.name.trim().toLowerCase();
+            if (!Object.keys(lineup).length && defaultTeamLineups[key]) {
+                lineup = defaultTeamLineups[key];
+            }
+            soccerField.querySelectorAll('.position').forEach(posEl => {
+                const pos = posEl.dataset.position;
+                posEl.textContent = lineup[pos] || pos;
+            });
+        });
+    }
+    // si venimos con ?teamId=… en URL
+    const teamsView = document.getElementById('teams-view');
+    if (teamsView) {
+        const params = new URLSearchParams(window.location.search);
+        const teamId = params.get('teamId');
+        if (teamId) {
+            loadTeamLineup(+teamId);
+            document.getElementById('players-field').style.display = 'block';
+        }
+    }
+
+    /* ======================= Tournaments ======================= */
     if (document.getElementById('tournament-form')) {
-        const tournamentForm = document.getElementById('tournament-form');
-        const tournamentsContainer = document.getElementById('tournaments-list');
+        const form = document.getElementById('tournament-form');
+        const list = document.getElementById('tournaments-list');
 
-        tournamentForm.addEventListener('submit', async function (e) {
+        form.addEventListener('submit', async e => {
             e.preventDefault();
-            const name = document.getElementById('tournament-name').value;
-            const date = document.getElementById('tournament-date').value;
-            const location = document.getElementById('tournament-location').value;
-
-            const tournamentDate = new Date(date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Reset time part for date comparison
-            
-            if (tournamentDate < today) {
-                showModal("Cannot create a tournament with a date in the past.");
+            if (!isAdmin) {
+                showModal('Debes ser administrador para añadir torneos');
                 return;
             }
-
-            const tournament = { name, date, location, teams: [], matches: [] };
-            await postData('tournaments', tournament);
+            const name = form['tournamentName'].value;
+            const date = form['tournamentDate'].value;
+            const loc  = form['tournamentLocation'].value;
+            const td   = new Date(date), today = new Date(); today.setHours(0,0,0,0);
+            if (td < today) {
+                showModal('Cannot create a tournament with a date in the past.');
+                return;
+            }
+            await postData('tournaments', { name, date, location: loc, teams: [], matches: [] });
             updateTournamentsList();
-            tournamentForm.reset();
+            form.reset();
         });
 
         async function updateTournamentsList() {
-            const tournaments = await fetchData('tournaments');
-            const tournamentsArray = Object.values(tournaments);
-            tournamentsContainer.innerHTML = '';
-            tournamentsArray.forEach(tournament => {
-                const div = document.createElement('div');
-                div.classList.add('list-item');
-                div.innerHTML = `
-                    <strong>${tournament.name}</strong> - ${tournament.date} - ${tournament.location}
-                     <button data-id="${tournament.id}" class="edit-tournament">Edit</button>
-                    <button data-id="${tournament.id}" class="delete-tournament">Delete</button>
+            const arr = Object.values(await fetchData('tournaments'));
+            list.innerHTML = '';
+            arr.forEach(t => {
+                list.insertAdjacentHTML('beforeend', `
+                  <div class="list-item">
+                    <strong>${t.name}</strong> – ${t.date} – ${t.location}
+                    <button data-id="${t.id}" class="edit-tournament">Edit</button>
+                    <button data-id="${t.id}" class="delete-tournament">Delete</button>
                     <div class="details">
-                        <p>Teams: ${tournament.teamIds.length}</p>
-                        <p>Matches: ${tournament.matchIds.length}</p>
+                      <p>Teams: ${t.teamIds.length}</p>
+                      <p>Matches: ${t.matchIds.length}</p>
                     </div>
-                `;
-                tournamentsContainer.appendChild(div);
+                  </div>
+                `);
             });
         }
 
-        tournamentsContainer.addEventListener('click', async function (e) {
+        list.addEventListener('click', async e => {
+            const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-tournament')) {
-                const id = e.target.getAttribute('data-id');
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para eliminar torneos');
+                    return;
+                }
                 await deleteData('tournaments', id);
                 updateTournamentsList();
             }
-            // --- EDIT TOURNAMENT ---
             if (e.target.classList.contains('edit-tournament')) {
-                   const id = e.target.dataset.id;
-                   const t  = await fetchData(`tournaments/${id}`);
-                
-                   openEditModal(
-                     'tournaments',          
-                     id,                     
-                     t,                     
-                     ['name','date','location'], 
-                     updateTournamentsList   // callback de refresco
-                   );
-                   return;
-                 }
-  
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para editar torneos');
+                    return;
+                }
+                const t = await fetchData(`tournaments/${id}`);
+                openEditModal('tournaments', id, t, ['name','date','location'], updateTournamentsList);
+            }
         });
 
         updateTournamentsList();
     }
 
-    /* ======================= Teams Functionality ======================= */
+    /* ======================= Teams ======================= */
     if (document.getElementById('team-form')) {
-        const teamForm = document.getElementById('team-form');
-        const teamsContainer = document.getElementById('teams-list');
+        const form = document.getElementById('team-form'),
+              list = document.getElementById('teams-list');
 
-        teamForm.addEventListener('submit', async function (e) {
+        form.addEventListener('submit', async e => {
             e.preventDefault();
-            const name = document.getElementById('team-name').value;
-            const coach = document.getElementById('team-coach').value;
-            const badge = `${API_BASE_URL}/logos/${name.toLowerCase()}`; 
-            const team = { name, coach, badge };
-            await postData('teams', team);
+            if (!isAdmin) {
+                showModal('Debes ser administrador para crear equipos');
+                return;
+            }
+            const name  = form['teamName'].value;
+            const coach = form['teamCoach'].value;
+            const badge = `${API_BASE_URL}/logos/${name.toLowerCase()}`;
+            await postData('teams', { name, coach, badge });
             updateTeamsList();
-            teamForm.reset();
+            form.reset();
         });
 
         async function updateTeamsList() {
-            const teams        = await fetchData('teams');
-            const teamsArray   = Object.values(teams);
-            teamsContainer.innerHTML = '';
-          
-            teamsArray.forEach(team => {
-              const div = document.createElement('div');
-              div.classList.add('list-item');
-          
-              div.innerHTML = `
-                <img src="${team.badge}" alt="${team.name}" class="team-logo">
-                <strong>${team.name}</strong> – Coach: ${team.coach}
-                <button data-id="${team.id}" class="show-lineup">Show Line-up</button>
-                <button data-id="${team.id}" class="edit-team">Edit</button>
-                <button data-id="${team.id}" class="delete-team">Delete</button>
-              `;
-          
-              teamsContainer.appendChild(div);
+            const arr = Object.values(await fetchData('teams'));
+            list.innerHTML = '';
+            arr.forEach(t => {
+                list.insertAdjacentHTML('beforeend', `
+                  <div class="list-item">
+                    <img src="${t.badge}" class="team-logo">
+                    <strong>${t.name}</strong> – Coach: ${t.coach}
+                    <button data-id="${t.id}" class="show-lineup">Show Line-up</button>
+                    <button data-id="${t.id}" class="edit-team">Edit</button>
+                    <button data-id="${t.id}" class="delete-team">Delete</button>
+                  </div>
+                `);
             });
-          }
-          
+        }
 
-          teamsContainer.addEventListener('click', async function (e) {
-
+        list.addEventListener('click', async e => {
+            const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-team')) {
-              const id = e.target.dataset.id;
-              await deleteData('teams', id);
-              updateTeamsList();
-              return;
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para eliminar equipos');
+                    return;
+                }
+                await deleteData('teams', id);
+                updateTeamsList();
             }
-          
             if (e.target.classList.contains('show-lineup')) {
-              const id          = e.target.dataset.id;
-              const inTeamsPage = window.location.pathname.endsWith('teams.html');
-          
-              if (inTeamsPage) {
-                // Si estamos en la misma pagina se muestra la alineacion
-                loadTeamLineup(parseInt(id));
-                document.getElementById('players-field').style.display = 'block';
-              } else {
-                // si estamos en otra pagina redirige a la pagina de equipos
-                window.location.href = `teams.html?teamId=${id}`;
-              }
+                const inTeams = window.location.pathname.endsWith('teams.html');
+                if (inTeams) {
+                    loadTeamLineup(+id);
+                    document.getElementById('players-field').style.display = 'block';
+                } else {
+                    window.location.href = `teams.html?teamId=${id}`;
+                }
             }
-            // --- EDIT TEAM ---
             if (e.target.classList.contains('edit-team')) {
-                const id = e.target.dataset.id;
-                const t  = await fetchData(`teams/${id}`);
-            
-                openEditModal(
-                  'teams',              
-                  id,                    
-                  t,                     
-                  ['name','coach'],      
-                  updateTeamsList        
-                );
-                return;
-              }
-          });
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para editar equipos');
+                    return;
+                }
+                const t = await fetchData(`teams/${id}`);
+                openEditModal('teams', id, t, ['name','coach'], updateTeamsList);
+            }
+        });
 
         updateTeamsList();
     }
 
-    /* ======================= Matches Functionality ======================= */
+    /* ======================= Matches ======================= */
     if (document.getElementById('match-form')) {
-        const matchForm = document.getElementById('match-form');
-        const matchesContainer = document.getElementById('matches-list');
+        const form = document.getElementById('match-form'),
+              list = document.getElementById('matches-list');
 
-        matchForm.addEventListener('submit', async function (e) {
+        form.addEventListener('submit', async e => {
             e.preventDefault();
-            const date = document.getElementById('match-date').value;
-            const time = document.getElementById('match-time').value;
-            const team1Name = document.getElementById('match-team1').value;
-            const team2Name = document.getElementById('match-team2').value;
-            const tournamentName = document.getElementById('match-tournament').value;
-
-            if (!date || !time || !team1Name || !team2Name || !tournamentName) {
-                showModal('Please fill in all fields.');
+            if (!isAdmin) {
+                showModal('Debes ser administrador para crear partidos');
                 return;
             }
-
-            // Check if the date is in the past
-            const matchDate = new Date(date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Reset time part for date comparison
-            
-            if (matchDate < today) {
-                showModal("Cannot create a match with a date in the past.");
+            const date = form['matchDate'].value;
+            const time = form['matchTime'].value;
+            const t1   = form['matchTeam1'].value;
+            const t2   = form['matchTeam2'].value;
+            const tor  = form['matchTournament'].value;
+            const md   = new Date(date), today = new Date(); today.setHours(0,0,0,0);
+            if (md < today) {
+                showModal('Cannot create a match with a date in the past.');
                 return;
             }
-
-            const teams = await fetchData('teams');
-            const teamsArray = Object.values(teams);
-
-            const tournamentsArray = await fetchData('tournaments').then(res => Object.values(res));
-            
-            const team1 = teamsArray.find(t => t.name === team1Name);
-            const team2 = teamsArray.find(t => t.name === team2Name);
-
-            const tournament = tournamentsArray.find(t => t.name === tournamentName);
-            
-            
+            const teams       = Object.values(await fetchData('teams'));
+            const tournaments = Object.values(await fetchData('tournaments'));
+            const team1       = teams.find(t=>t.name===t1);
+            const team2       = teams.find(t=>t.name===t2);
+            const tournament  = tournaments.find(t=>t.name===tor);
             if (!team1 || !team2) {
-                showModal("One or both teams don't exist. Please create them first.");
+                showModal('One or both teams do not exist.');
                 return;
             }
-
-            if (team1.id === team2.id) {
-                showModal("A team cannot play against itself.");
+            if (team1.id===team2.id) {
+                showModal('A team cannot play against itself.');
                 return;
             }
             if (!tournament) {
-                showModal("Tournament not found. Please create it first.")
+                showModal('Tournament not found.');
                 return;
             }
-            
-            const match = { 
-                date, 
-                time, 
-                team1Id: team1.id, 
-                team2Id: team2.id, 
-                tournamentId: tournament.id 
-            };
-            
-            await postData('matches', match);
+            await postData('matches', {
+                date, time,
+                team1Id: team1.id,
+                team2Id: team2.id,
+                tournamentId: tournament.id
+            });
             updateMatchesList();
-            matchForm.reset();
+            form.reset();
         });
 
         async function updateMatchesList() {
-            const matches = await fetchData('matches');
-            const matchesArray = Object.values(matches);
-            console.log(`matches: ${JSON.stringify(matchesArray)}`);
-            matchesContainer.innerHTML = '';
-            for (const match of matchesArray) {
-                const team1 = await fetchData(`teams/${match.team1Id}`);
-                const team2 = await fetchData(`teams/${match.team2Id}`);
-                const tournament = await fetchData(`tournaments/${match.tournamentId}`);
-        
-                const team1Logo = team1.badge ? team1.badge : `${API_BASE_URL}/logos/default.jpg`;
-                const team2Logo = team2.badge ? team2.badge : `${API_BASE_URL}/logos/default.jpg`;
-        
-                const team1Name = team1.name;
-                const team2Name = team2.name;
-                const tournamentName = tournament.name;
-        
-                const div = document.createElement('div');
-                div.classList.add('list-item');
-                div.innerHTML = `
+            const arr = Object.values(await fetchData('matches'));
+            list.innerHTML = '';
+            for (const m of arr) {
+                const t1 = await fetchData(`teams/${m.team1Id}`);
+                const t2 = await fetchData(`teams/${m.team2Id}`);
+                const tr = await fetchData(`tournaments/${m.tournamentId}`);
+                list.insertAdjacentHTML('beforeend', `
+                  <div class="list-item">
                     <div class="match-card">
-                        <div class="team-info">
-                            <img src="${team1Logo}" alt="${team1Name}" class="team-logo">
-                            <strong>${team1Name}</strong>
-                        </div>
-                        <span>vs</span>
-                        <div class="team-info">
-                            <img src="${team2Logo}" alt="${team2Name}" class="team-logo">
-                            <strong>${team2Name}</strong>
-                        </div>
-                        <div class="match-details">
-                            <p><strong>Tournament:</strong> ${tournamentName}</p>
-                            <p><strong>Date:</strong> ${match.date} - <strong>Time:</strong> ${match.time}</p>
-                        </div>
-                        <button data-id="${match.id}" class="edit-match">Edit</button>
-                        <button data-id="${match.id}" class="delete-match">Delete</button>
+                      <div class="team-info">
+                        <img src="${t1.badge}" class="team-logo"><strong>${t1.name}</strong>
+                      </div>
+                      <span>vs</span>
+                      <div class="team-info">
+                        <img src="${t2.badge}" class="team-logo"><strong>${t2.name}</strong>
+                      </div>
+                      <div class="match-details">
+                        <p><strong>Tournament:</strong> ${tr.name}</p>
+                        <p><strong>Date:</strong> ${m.date} – <strong>Time:</strong> ${m.time}</p>
+                      </div>
+                      <button data-id="${m.id}" class="edit-match">Edit</button>
+                      <button data-id="${m.id}" class="delete-match">Delete</button>
                     </div>
-                `;
-                matchesContainer.appendChild(div);
+                  </div>
+                `);
             }
         }
-        
 
-        matchesContainer.addEventListener('click', async function (e) {
+        list.addEventListener('click', async e => {
+            const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-match')) {
-                const id = e.target.getAttribute('data-id');
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para eliminar partidos');
+                    return;
+                }
                 await deleteData('matches', id);
                 updateMatchesList();
             }
-
-            // --- EDIT MATCH ---
             if (e.target.classList.contains('edit-match')) {
-                const id = e.target.dataset.id;
-                const m  = await fetchData(`matches/${id}`);
-            
-                openEditModal(
-                  'matchess',              
-                  id,                     
-                  m,                      
-                  ['date','time'],        
-                  updateMatchesList       
-                );
-                return;
-              }
-  
+                if (!isAdmin) {
+                    showModal('Debes ser administrador para editar partidos');
+                    return;
+                }
+                const m = await fetchData(`matches/${id}`);
+                openEditModal('matches', id, m, ['date','time'], updateMatchesList);
+            }
         });
 
         updateMatchesList();
     }
 
-    function showModal(message) {
-        const modal = document.getElementById('modal-alert');
-        const modalMessage = document.getElementById('modal-message');
-        modalMessage.textContent = message;
-        modal.style.display = "block";
-      }
-      
-      function hideModal() {
-        const modal = document.getElementById('modal-alert');
-        modal.style.display = "none";
-      }
-      
-      document.getElementById('modal-close').addEventListener('click', hideModal);
-
-      
-
-
 });
+
 
 const defaultLineup = {
     GK: "",

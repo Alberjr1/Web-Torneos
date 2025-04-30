@@ -13,7 +13,7 @@ public class Team {
     private String coach;
     private String badge;
     
-    // Add the many-to-many relationship
+    //many-to-many relationship
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentTeam> teamTournaments = new HashSet<>();
 

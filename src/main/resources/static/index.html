@@ -33,6 +33,14 @@
   </div>
 </div>
 
+<!-- “You’re not admin” modal -->
+<div id="modal-alert" class="modal">
+  <div class="modal-content">
+    <span id="modal-close" class="close">&times;</span>
+    <p id="modal-message"></p>
+  </div>
+</div>
+
 <body>
   <!-- Header -->
   <header>
@@ -42,9 +50,8 @@
         <li><a href="tournaments.html">Tournaments</a></li>
         <li><a href="teams.html">Teams</a></li>
         <li><a href="matches.html">Matches</a></li>
-        <!-- Nuevo enlace de login -->
+        <!--  enlace de login -->
         <button class="btn btn-login" onclick="location.href='/login.html'">
-          <!-- SVG de usuario -->
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
             <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm9-1a3 3 0 0 0-6 0h6z"/>
             <path fill-rule="evenodd" d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
