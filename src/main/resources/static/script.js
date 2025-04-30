@@ -95,6 +95,28 @@ document.addEventListener('DOMContentLoaded', async function () {
         editModal.style.display = 'block';
     }
 
+    // Global function for updating tournaments lists across different views
+    async function updateTournamentsList() {
+        const arr = Object.values(await fetchData('tournaments'));
+        const tournamentsList = document.getElementById('tournaments-list');
+        if (!tournamentsList) return; // Skip if element doesn't exist on this page
+        
+        tournamentsList.innerHTML = '';
+        arr.forEach(t => {
+            tournamentsList.insertAdjacentHTML('beforeend', `
+              <div class="list-item">
+                <strong>${t.name}</strong> – ${t.date} – ${t.location}
+                <button data-id="${t.id}" class="edit-tournament">Edit</button>
+                <button data-id="${t.id}" class="delete-tournament">Delete</button>
+                <div class="details">
+                  <p>Teams: ${t.teamIds.length}</p>
+                  <p>Matches: ${t.matchIds.length}</p>
+                </div>
+              </div>
+            `);
+        });
+    }
+
     /* ======================= Load Line-up ======================= */
     function loadTeamLineup(teamId) {
         const soccerField = document.querySelector('.soccer-field');
@@ -147,24 +169,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             updateTournamentsList();
             form.reset();
         });
-
-        async function updateTournamentsList() {
-            const arr = Object.values(await fetchData('tournaments'));
-            list.innerHTML = '';
-            arr.forEach(t => {
-                list.insertAdjacentHTML('beforeend', `
-                  <div class="list-item">
-                    <strong>${t.name}</strong> – ${t.date} – ${t.location}
-                    <button data-id="${t.id}" class="edit-tournament">Edit</button>
-                    <button data-id="${t.id}" class="delete-tournament">Delete</button>
-                    <div class="details">
-                      <p>Teams: ${t.teamIds.length}</p>
-                      <p>Matches: ${t.matchIds.length}</p>
-                    </div>
-                  </div>
-                `);
-            });
-        }
 
         list.addEventListener('click', async e => {
             const id = e.target.dataset.id;
@@ -301,6 +305,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 tournamentId: tournament.id
             });
             updateMatchesList();
+            updateTournamentsList(); // Add this line to update tournaments
             form.reset();
         });
 
@@ -342,6 +347,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 await deleteData('matches', id);
                 updateMatchesList();
+                updateTournamentsList(); // Add this line to update tournaments
             }
             if (e.target.classList.contains('edit-match')) {
                 if (!isAdmin) {

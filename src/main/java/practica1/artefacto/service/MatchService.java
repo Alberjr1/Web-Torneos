@@ -82,6 +82,52 @@ public class MatchService {
     }
 
     public void delete(Long id) {
+        // First get the match to access its tournament ID
+        Match match = matchRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Match not found: " + id));
+        
+        // If the match has a tournament, update the tournament
+        if (match.getTournamentId() != null) {
+            Tournament tournament = tournamentRepository.findById(match.getTournamentId())
+                .orElse(null);
+            
+            if (tournament != null) {
+                Long tournamentId = tournament.getId();
+                Long team1Id = match.getTeam1Id();
+                Long team2Id = match.getTeam2Id();
+                
+                // Remove the match ID from the tournament's match IDs list
+                tournament.removeMatchId(id);
+                
+                // After removing this match, check if team1 and team2 are still used in any other matches
+                List<Match> remainingMatches = matchRepository.findByTournamentId(tournamentId);
+                
+                // Remove the current match from consideration (it's being deleted)
+                remainingMatches.removeIf(m -> m.getId().equals(id));
+                
+                // Check if team1 is still used in any remaining match
+                boolean team1StillUsed = remainingMatches.stream()
+                    .anyMatch(m -> team1Id.equals(m.getTeam1Id()) || team1Id.equals(m.getTeam2Id()));
+                
+                // Check if team2 is still used in any remaining match
+                boolean team2StillUsed = remainingMatches.stream()
+                    .anyMatch(m -> team2Id.equals(m.getTeam1Id()) || team2Id.equals(m.getTeam2Id()));
+                
+                // Remove team1 from tournament if no longer used
+                if (!team1StillUsed) {
+                    tournament.removeTeamId(team1Id);
+                }
+                
+                // Remove team2 from tournament if no longer used
+                if (!team2StillUsed) {
+                    tournament.removeTeamId(team2Id);
+                }
+                
+                tournamentRepository.save(tournament);
+            }
+        }
+        
+        // Now delete the match
         matchRepository.deleteById(id);
     }
 
