@@ -117,6 +117,50 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    // Move updateMatchesList to global scope like we did with tournaments
+    async function updateMatchesList() {
+        const matchesList = document.getElementById('matches-list');
+        if (!matchesList) return; // Skip if element doesn't exist on this page
+        
+        const arr = Object.values(await fetchData('matches'));
+        matchesList.innerHTML = '';
+        for (const m of arr) {
+            // Skip if the match data is incomplete (tournament may have been deleted)
+            if (!m.team1Id || !m.team2Id || !m.tournamentId) continue;
+            
+            try {
+                const t1 = await fetchData(`teams/${m.team1Id}`);
+                const t2 = await fetchData(`teams/${m.team2Id}`);
+                const tr = await fetchData(`tournaments/${m.tournamentId}`);
+                
+                // Skip if any related entity doesn't exist
+                if (!t1 || !t2 || !tr) continue;
+                
+                matchesList.insertAdjacentHTML('beforeend', `
+                  <div class="list-item">
+                    <div class="match-card">
+                      <div class="team-info">
+                        <img src="${t1.badge}" class="team-logo"><strong>${t1.name}</strong>
+                      </div>
+                      <span>vs</span>
+                      <div class="team-info">
+                        <img src="${t2.badge}" class="team-logo"><strong>${t2.name}</strong>
+                      </div>
+                      <div class="match-details">
+                        <p><strong>Tournament:</strong> ${tr.name}</p>
+                        <p><strong>Date:</strong> ${m.date} – <strong>Time:</strong> ${m.time}</p>
+                      </div>
+                      <button data-id="${m.id}" class="edit-match">Edit</button>
+                      <button data-id="${m.id}" class="delete-match">Delete</button>
+                    </div>
+                  </div>
+                `);
+            } catch (error) {
+                console.warn(`Error loading match details for match ${m.id}:`, error);
+            }
+        }
+    }
+
     /* ======================= Load Line-up ======================= */
     function loadTeamLineup(teamId) {
         const soccerField = document.querySelector('.soccer-field');
@@ -179,6 +223,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 await deleteData('tournaments', id);
                 updateTournamentsList();
+                updateMatchesList(); // Add this line to refresh matches
             }
             if (e.target.classList.contains('edit-tournament')) {
                 if (!isAdmin) {
@@ -309,35 +354,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             form.reset();
         });
 
-        async function updateMatchesList() {
-            const arr = Object.values(await fetchData('matches'));
-            list.innerHTML = '';
-            for (const m of arr) {
-                const t1 = await fetchData(`teams/${m.team1Id}`);
-                const t2 = await fetchData(`teams/${m.team2Id}`);
-                const tr = await fetchData(`tournaments/${m.tournamentId}`);
-                list.insertAdjacentHTML('beforeend', `
-                  <div class="list-item">
-                    <div class="match-card">
-                      <div class="team-info">
-                        <img src="${t1.badge}" class="team-logo"><strong>${t1.name}</strong>
-                      </div>
-                      <span>vs</span>
-                      <div class="team-info">
-                        <img src="${t2.badge}" class="team-logo"><strong>${t2.name}</strong>
-                      </div>
-                      <div class="match-details">
-                        <p><strong>Tournament:</strong> ${tr.name}</p>
-                        <p><strong>Date:</strong> ${m.date} – <strong>Time:</strong> ${m.time}</p>
-                      </div>
-                      <button data-id="${m.id}" class="edit-match">Edit</button>
-                      <button data-id="${m.id}" class="delete-match">Delete</button>
-                    </div>
-                  </div>
-                `);
-            }
-        }
-
         list.addEventListener('click', async e => {
             const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-match')) {
@@ -359,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
 
-        updateMatchesList();
+        updateMatchesList(); // Call the global version
     }
 
 });
