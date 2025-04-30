@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/" />
+  
+    <title>Sign in · Tournament Manager</title>
+    <link rel="stylesheet" href="/styles.css">
+  
+  <style>
+    /* glass‐card centre */
+    .card {
+      max-width: 400px;
+      margin: 12vh auto;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.85);        
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 26px rgba(0,0,0,.35);
+      color: #222;                                
+    }
+  
+    .card h2 {
+      margin: 0 0 1.5rem;
+      text-align: center;
+      color: #111;
+      font-weight: 700;
+      font-size: 1.75rem;
+    }
+  
+    .card label {
+      display: block;
+      margin-bottom: .3rem;
+      color: #333;                               
+      font-weight: 500;
+    }
+  
+    .card input {
+      width: 100%;
+      padding: .7rem;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      margin-bottom: 1.2rem;
+      background: rgba(255,255,255,0.95);          
+      color: #222;                                 
+      font-size: 1rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+  
+    .card input:focus {
+      outline: none;
+      border-color: #0099e5;
+      box-shadow: 0 0 0 3px rgba(0,153,229,0.25);
+    }
+  
+    .card button {
+      width: 100%;
+      border: none;
+      padding: .75rem;
+      border-radius: 30px;
+      font-weight: 600;
+      background: linear-gradient(135deg,#00b4db,#0093b8);
+      color: #fff;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+  
+    .card button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.3);
+    }
+  </style>
+  
+</head>
+<body>
+  <header class="frost-header">
+    <h1 style="margin:0;text-align:left">Tournament Manager</h1>
+  </header>
+
+  <main>
+    <form class="card" method="post" action="/login">
+      <h2>Sign in</h2>
+
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" required autofocus>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+
+      <button type="submit">Login</button>
+    </form>
+  </main>
+</body>
+</html>
+
+
