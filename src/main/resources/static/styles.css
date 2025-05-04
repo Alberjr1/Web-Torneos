@@ -263,6 +263,7 @@ footer {
   width: 100%;
 }
 
+/* Estilos mejorados para modales */
 .modal {
   display: none;
   position: fixed;
@@ -272,31 +273,140 @@ footer {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
 }
 
 .modal-content {
-  background-color: #fff;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 400px;
-  text-align: center;
-  border-radius: 8px;
+  position: relative;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
+  margin: 10vh auto;
+  padding: 0;
+  width: 90%;
+  max-width: 550px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  transform: translateY(0);
+  animation: modalSlideIn 0.3s ease-out forwards;
+  overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--btn-main), #0da1a8);
+  color: white;
+  padding: 1.2rem 2rem;
+  position: relative;
+  border-radius: 16px 16px 0 0;
+}
+
+#edit-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  color: rgba(255,255,255,0.8);
+  font-size: 1.8rem;
+  font-weight: normal;
+  transition: all 0.2s;
+  line-height: 1;
+  height: 28px;
+  width: 28px;
+  text-align: center;
+  border-radius: 50%;
 }
 
-.close:hover,
-.close:focus {
-  color: #000;
+.close:hover {
+  background: rgba(255,255,255,0.3);
+  color: white;
+  transform: rotate(90deg);
+}
+
+#edit-form {
+  padding: 1.5rem 2rem 2rem;
+}
+
+#edit-fields {
+  margin-bottom: 1.5rem;
+}
+
+#edit-fields label {
+  display: block;
+  margin: 1rem 0 0.4rem;
+  font-weight: 500;
+  color: #333;
+}
+
+#edit-fields input, 
+#edit-fields select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+#edit-fields input:focus,
+#edit-fields select:focus {
+  outline: none;
+  border-color: var(--btn-main);
+  box-shadow: 0 0 0 3px rgba(17, 197, 186, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+#edit-form .primary-btn {
+  background: var(--btn-main);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.8rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#edit-form .primary-btn:hover {
+  background: var(--btn-main-h);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+#edit-form .cancel-btn {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 0.8rem 1.8rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#edit-form .cancel-btn:hover {
+  background: #f5f5f5;
+  color: #333;
 }
 
 .team-info{

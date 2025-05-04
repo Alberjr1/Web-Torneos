@@ -18,17 +18,19 @@
   </div>
 </div>
 
-<!-- ---------- EDIT MODAL---------- -->
+<!-- EDIT MODAL -->
 <div id="edit-modal" class="modal">
   <div class="modal-content">
-    <span id="edit-close" class="close">&times;</span>
-    
-    <h3 id="edit-title">Edit</h3>
-
+    <div class="modal-header">
+      <h3 id="edit-title">Edit</h3>
+      <span id="edit-close" class="close">&times;</span>
+    </div>
     <form id="edit-form">
       <div id="edit-fields"></div>
-
-      <button type="submit" class="primary-btn">Save</button>
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="edit-cancel">Cancel</button>
+        <button type="submit" class="primary-btn">Save Changes</button>
+      </div>
     </form>
   </div>
 </div>

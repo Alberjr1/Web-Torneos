@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const editFields = document.getElementById('edit-fields');
     const editForm   = document.getElementById('edit-form');
     document.getElementById('edit-close').onclick = () => editModal.style.display = 'none';
+    document.getElementById('edit-cancel').onclick = () => editModal.style.display = 'none';
 
     function openEditModal(entity, id, data, fields, cbRefresh) {
         editTitle.textContent = `Edit ${entity.slice(0,-1)} #${id}`;
