@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const me = await fetchData('users/me');
             isAdmin = Array.isArray(me.roles) && me.roles.includes('ROLE_ADMIN');
         } catch (e) {
-            console.warn('No pude cargar información de usuario', e);
+            console.warn('Error al cargar la información de usuario', e);
         }
     }
     await loadUserInfo();
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function updateTournamentsList() {
         const arr = Object.values(await fetchData('tournaments'));
         const tournamentsList = document.getElementById('tournaments-list');
-        if (!tournamentsList) return; // Skip if element doesn't exist on this page
+        if (!tournamentsList) return; 
         
         tournamentsList.innerHTML = '';
         arr.forEach(t => {
@@ -120,12 +120,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Move updateMatchesList to global scope like we did with tournaments
     async function updateMatchesList() {
         const matchesList = document.getElementById('matches-list');
-        if (!matchesList) return; // Skip if element doesn't exist on this page
+        if (!matchesList) return; 
         
         const arr = Object.values(await fetchData('matches'));
         matchesList.innerHTML = '';
         for (const m of arr) {
-            // Skip if the match data is incomplete (tournament may have been deleted)
+            
             if (!m.team1Id || !m.team2Id || !m.tournamentId) continue;
             
             try {
@@ -133,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const t2 = await fetchData(`teams/${m.team2Id}`);
                 const tr = await fetchData(`tournaments/${m.tournamentId}`);
                 
-                // Skip if any related entity doesn't exist
                 if (!t1 || !t2 || !tr) continue;
                 
                 matchesList.insertAdjacentHTML('beforeend', `
@@ -218,16 +217,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-tournament')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para eliminar torneos');
+                    showModal('You must be an admin to delete tournaments');
                     return;
                 }
                 await deleteData('tournaments', id);
                 updateTournamentsList();
-                updateMatchesList(); // Add this line to refresh matches
+                updateMatchesList(); 
             }
             if (e.target.classList.contains('edit-tournament')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para editar torneos');
+                    showModal('You must be an admin to edit tournaments');
                     return;
                 }
                 const t = await fetchData(`tournaments/${id}`);
@@ -246,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         form.addEventListener('submit', async e => {
             e.preventDefault();
             if (!isAdmin) {
-                showModal('Debes ser administrador para crear equipos');
+                showModal('You must be an admin to create teams');
                 return;
             }
             const name  = form['teamName'].value;
@@ -277,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-team')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para eliminar equipos');
+                    showModal('You must be an admin to delete teams');
                     return;
                 }
                 await deleteData('teams', id);
@@ -294,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             if (e.target.classList.contains('edit-team')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para editar equipos');
+                    showModal('you must be an admin to edit teams');
                     return;
                 }
                 const t = await fetchData(`teams/${id}`);
@@ -313,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         form.addEventListener('submit', async e => {
             e.preventDefault();
             if (!isAdmin) {
-                showModal('Debes ser administrador para crear partidos');
+                showModal('You must be an admin to create matches');
                 return;
             }
             const date = form['matchDate'].value;
@@ -350,7 +349,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 tournamentId: tournament.id
             });
             updateMatchesList();
-            updateTournamentsList(); // Add this line to update tournaments
+            updateTournamentsList(); 
             form.reset();
         });
 
@@ -358,16 +357,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             const id = e.target.dataset.id;
             if (e.target.classList.contains('delete-match')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para eliminar partidos');
+                    showModal('You must be an admin to delete matches');
                     return;
                 }
                 await deleteData('matches', id);
                 updateMatchesList();
-                updateTournamentsList(); // Add this line to update tournaments
+                updateTournamentsList(); 
             }
             if (e.target.classList.contains('edit-match')) {
                 if (!isAdmin) {
-                    showModal('Debes ser administrador para editar partidos');
+                    showModal('You must be an admin to edit matches');
                     return;
                 }
                 const m = await fetchData(`matches/${id}`);
@@ -375,7 +374,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
 
-        updateMatchesList(); // Call the global version
+        updateMatchesList(); 
     }
 
 });
