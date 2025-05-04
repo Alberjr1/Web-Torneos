@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         form.addEventListener('submit', async e => {
             e.preventDefault();
             if (!isAdmin) {
-                showModal('Debes ser administrador para añadir torneos');
+                showModal('You must be an admin to create tournaments');
                 return;
             }
             const name = form['tournamentName'].value;
