@@ -14,7 +14,6 @@ public class LogoController {
     @GetMapping("/{name}")
     public ResponseEntity<Resource> getLogo(@PathVariable String name) {
         String logoPath = "static/logos/" + name.toLowerCase() + ".JPG";
-        // Check if the logo file exists in the classpath if not just return 404
         
 
         Resource resource = new ClassPathResource(logoPath);
@@ -23,7 +22,7 @@ public class LogoController {
         }
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") // Adjust content type based on image format
+                .header(HttpHeaders.CONTENT_TYPE, "image/jpeg") 
                 .body(resource);
     }
 }

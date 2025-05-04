@@ -20,20 +20,16 @@ public class TournamentTeam implements Serializable {
     @JoinColumn(name = "team_id")
     private Team team;
     
-    // Additional fields if needed (like registration date, etc.)
     private String registrationDate;
     
-    // Default constructor
     public TournamentTeam() {}
     
-    // Constructor with fields
     public TournamentTeam(Tournament tournament, Team team) {
         this.tournament = tournament;
         this.team = team;
         this.id = new TournamentTeamId(tournament.getId(), team.getId());
     }
     
-    // Getters and setters
     public TournamentTeamId getId() {
         return id;
     }

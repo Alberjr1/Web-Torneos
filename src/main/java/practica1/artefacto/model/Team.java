@@ -13,11 +13,9 @@ public class Team {
     private String coach;
     private String badge;
     
-    //many-to-many relationship
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TournamentTeam> teamTournaments = new HashSet<>();
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -43,7 +41,6 @@ public class Team {
         this.badge = badge;
     }
 
-    // New getter and setter for teamTournaments
     public Set<TournamentTeam> getTeamTournaments() {
         return teamTournaments;
     }

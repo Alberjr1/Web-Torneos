@@ -29,18 +29,15 @@ public class Tournament {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL)
     private List<Match> matches = new ArrayList<>();
 
-    // Convenience method to add a team to the tournament
     public void addTeam(Team team) {
         TournamentTeam tournamentTeam = new TournamentTeam(this, team);
         tournamentTeams.add(tournamentTeam);
     }
     
-    // Convenience method to remove a team from the tournament
     public void removeTeam(Team team) {
         tournamentTeams.removeIf(tournamentTeam -> tournamentTeam.getTeam().equals(team));
     }
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -103,7 +100,6 @@ public class Tournament {
         this.teamIds.addAll(teamIds);
     }
     
-    // New getter and setter for tournamentTeams
     public Set<TournamentTeam> getTournamentTeams() {
         return tournamentTeams;
     }
@@ -112,7 +108,6 @@ public class Tournament {
         this.tournamentTeams = tournamentTeams;
     }
 
-    // getter and setter for matches
     public List<Match> getMatches() {
         return matches;
     }

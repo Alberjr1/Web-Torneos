@@ -10,16 +10,13 @@ public class TournamentTeamId implements Serializable {
     private Long tournamentId;
     private Long teamId;
     
-    // Default constructor
     public TournamentTeamId() {}
     
-    // Constructor with fields
     public TournamentTeamId(Long tournamentId, Long teamId) {
         this.tournamentId = tournamentId;
         this.teamId = teamId;
     }
     
-    // Getters and setters
     public Long getTournamentId() {
         return tournamentId;
     }
@@ -36,7 +33,6 @@ public class TournamentTeamId implements Serializable {
         this.teamId = teamId;
     }
     
-    // Equals and hashCode methods for composite keys
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
