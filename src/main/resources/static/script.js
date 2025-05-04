@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const today = new Date(); today.setHours(0,0,0,0);
                 const sel   = new Date(patch.date);
                 if (sel < today) {
-                    showModal('Date cannot be in the past.');
+                    showDateErrorModal('Date cannot be in the past.');
                     return;
                 }
             }
@@ -95,6 +95,44 @@ document.addEventListener('DOMContentLoaded', async function () {
         };
         editModal.style.display = 'block';
     }
+
+    function showDateErrorModal(message) {
+        document.getElementById('edit-modal').style.display = 'none';
+        
+        const modalAlert = document.getElementById('modal-alert');
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.textContent = message;
+        modalAlert.style.display = 'block';
+    }
+
+    
+    function validateDate(dateString) {
+        const selectedDate = new Date(dateString);
+        const today = new Date();
+        
+        
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+            showDateErrorModal("The date cannot be in the past. Please select a future date.");
+            return false;
+        }
+        
+        return true;
+    }
+
+    
+    document.getElementById('edit-form').addEventListener('submit', function(event) {
+        const dateInput = document.getElementById('edit-date') || document.getElementById('tournament-date-edit');
+        
+        if (dateInput && !validateDate(dateInput.value)) {
+            event.preventDefault();
+            return false;
+        }
+        
+        
+    });
 
     // Global function for updating tournaments lists across different views
     async function updateTournamentsList() {
@@ -376,6 +414,36 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         updateMatchesList(); 
+    }
+
+    
+    function updateEntity(entityType, id, formData) {
+        fetch(`/api/${entityType}s/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Error occurred while updating');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('edit-modal').style.display = 'none';
+            loadEntities(entityType);
+        })
+        .catch(error => {
+            // Si el error está relacionado con una fecha pasada
+            if (error.message.includes('date') || error.message.includes('past')) {
+                showDateErrorModal(error.message);
+            } else {
+                // Manejar otros tipos de errores
+                alert(error.message);
+            }
+        });
     }
 
 });
