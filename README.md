@@ -1,1 +1,1 @@
-Proyecto realizado en grupo, en el que me encargue personalmemte de desarrolar el Front y de la lógica de interacción del lado del cliente
+Proyecto realizado en grupo, en el que mi papel principal fue desarrolar el Frontend y la lógica de interacción del lado del cliente
